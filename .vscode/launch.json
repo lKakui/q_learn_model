@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Q learning",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "src",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ]
+}
