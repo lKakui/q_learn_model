@@ -219,6 +219,9 @@ class QLearningSimulator:
 
                 if direction:
                     self.q_table[position][direction] = reward
+                    
+                if next_position in self.ambient_table[position]:
+                    self.ambient_table[position][next_position] = reward
 
                 position = next_position
 
