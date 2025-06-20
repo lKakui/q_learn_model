@@ -29,6 +29,7 @@ class QLearningSimulator:
         self.end = end
         self.q_table = {}
         self.ambient_table = {}
+        self.create_table(self.matrix)
 
     def create_table(self, mat: list[list[int]]) -> tuple[dict, dict]:
         """
@@ -174,21 +175,34 @@ class QLearningSimulator:
 
     def run_model(
         self,
-        map: list[list[int]]
+        map: list[list[int]],
+        alpha: float = 0.1,
+        gamma: float = 0.9,
+        step_callback=None,
+        max_episodes: int = 1000
     ):
         """
         Executa o modelo Q-Learning até a convergência da Q-table.
 
         Args:
             map (list[list[int]]): Mapa do ambiente.
-            start (tuple[int, int]): Posição inicial.
-            end (tuple[int, int]): Posição final.
+            alpha (float, optional): Taxa de aprendizado (quanto o Q-value é atualizado a cada iteração). Padrão é 0.1.
+            gamma (float, optional): Fator de desconto para recompensas futuras. Padrão é 0.9.
+            step_callback (callable, optional): Função chamada a cada movimento do agente, recebe a posição atual como argumento. Útil para visualização. Padrão é None.
+            max_episodes (int, optional): Número máximo de episódios de treinamento. Padrão é 1000.
         """
-        position = self.start
-        previous_qtable = {}
 
-        while True:
-            if self.is_qtable_stable(self.q_table, previous_qtable):
+        epsilon = 0.3
+        decay = 0.995
+        min_epsilon = 0.05
+
+        previous_qtable = {}
+        episode = 0
+
+        while episode < max_episodes:
+            position = self.start
+
+            if self.is_qtable_stable(previous_qtable):
                 print("A Q-table estabilizou. Encerrando execução.")
                 break
 
@@ -200,12 +214,16 @@ class QLearningSimulator:
                     print(f"Nenhuma opção disponível para a posição {position}.")
                     break
 
-                if random.random() < 0.3:
+                if random.random() < epsilon:
                     next_position = random.choice(options_list)
                 else:
-                    next_position = max(options_list, key=lambda opt: map[opt[0]][opt[1]])
+                    next_position = max(options_list, key=lambda opt: max(self.q_table[opt].values()))
 
-                reward = self.calculate_reward(position, options_list, map)
+                reward = -1
+                if next_position == self.end:
+                    reward = 100.0
+                else:
+                    reward = self.calculate_reward(position, options_list, map)
 
                 direction = None
                 if next_position == (position[0] - 1, position[1]):
@@ -218,11 +236,18 @@ class QLearningSimulator:
                     direction = "right"
 
                 if direction:
-                    self.q_table[position][direction] = reward
+                    old_q = self.q_table[position][direction]
+                    next_qs = self.q_table[next_position].values()
+                    max_next_q = max(next_qs) if next_qs else 0
+                    self.q_table[position][direction] = old_q + alpha * (reward + gamma * max_next_q - old_q)
                     
-                if next_position in self.ambient_table[position]:
-                    self.ambient_table[position][next_position] = reward
+                if next_position in self.ambient_table[position] and direction:
+                    self.ambient_table[position][next_position] = self.q_table[position][direction]
 
                 position = next_position
 
-            position = self.start
+                if step_callback:
+                    step_callback(next_position)
+
+            epsilon = max(min_epsilon, epsilon * decay)
+            episode += 1

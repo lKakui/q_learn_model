@@ -3,6 +3,14 @@ from tkinter import ttk
 
 class QLearningVisualizer:
     def __init__(self, simulator,start,final):
+        """
+        Visualizador gráfico para o Q-Learning.
+
+        Args:
+            simulator (QLearningSimulator): Instância do simulador Q-Learning já configurado.
+            start (tuple[int, int]): Posição inicial do agente no ambiente (linha, coluna).
+            final (tuple[int, int]): Posição final (objetivo) no ambiente (linha, coluna).
+        """
         self.simulator = simulator
         self.rows = len(simulator.matrix)
         self.cols = len(simulator.matrix[0])
@@ -67,10 +75,17 @@ class QLearningVisualizer:
 
             
     def run_simulation(self):
-        self.simulator.run_model(self.simulator.matrix)
+        def step_callback(pos):
+            self.draw_map()
+            self.draw_ia(pos)
+            self.root.update()
+            self.root.after(1)
+
+        self.simulator.run_model(self.simulator.matrix, step_callback=step_callback)
         self.draw_map()
         self.draw_ia(self.end)
 
 
     def start_gui(self):
         self.root.mainloop()
+        print("end")
