@@ -20,8 +20,14 @@ class QLearningVisualizer:
         self.canvas = tk.Canvas(self.root, width=self.cols * self.cell_size,
                                           height=self.rows * self.cell_size)
         self.canvas.pack()
-        self.btn_run = ttk.Button(self.root, text="Executar Modelo", command=self.run_simulation)
-        self.btn_run.pack(pady=10)
+        frame = ttk.Frame(self.root)
+        frame.pack(pady=10)
+
+        self.btn_run = ttk.Button(frame, text="Executar Modelo", command=self.run_simulation)
+        self.btn_run.pack(side=tk.LEFT)
+
+        self.episode_label = ttk.Label(frame, text=f"Total de episódios: {self.simulator.episode}")
+        self.episode_label.pack(side=tk.LEFT, padx=20)
         self.start = start
         self.end = final
         self.draw_map()
@@ -84,6 +90,8 @@ class QLearningVisualizer:
         self.simulator.run_model(self.simulator.matrix, step_callback=step_callback)
         self.draw_map()
         self.draw_ia(self.end)
+        
+        self.episode_label.config(text=f"Total de episódios: {self.simulator.episode}")
 
 
     def start_gui(self):

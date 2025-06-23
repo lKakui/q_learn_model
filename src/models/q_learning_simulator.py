@@ -27,6 +27,7 @@ class QLearningSimulator:
         self.propagation = propagation
         self.start = start
         self.end = end
+        self.episode = 0
         self.q_table = {}
         self.ambient_table = {}
         self.create_table(self.matrix)
@@ -197,9 +198,8 @@ class QLearningSimulator:
         min_epsilon = 0.05
 
         previous_qtable = {}
-        episode = 0
 
-        while episode < max_episodes:
+        while self.episode < max_episodes:
             position = self.start
 
             if self.is_qtable_stable(previous_qtable):
@@ -250,4 +250,4 @@ class QLearningSimulator:
                     step_callback(next_position)
 
             epsilon = max(min_epsilon, epsilon * decay)
-            episode += 1
+            self.episode += 1
