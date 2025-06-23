@@ -177,7 +177,6 @@ class QLearningSimulator:
     def run_model(
         self,
         map: list[list[int]],
-        alpha: float = 0.1,
         gamma: float = 0.9,
         step_callback=None,
         max_episodes: int = 1000
@@ -187,7 +186,6 @@ class QLearningSimulator:
 
         Args:
             map (list[list[int]]): Mapa do ambiente.
-            alpha (float, optional): Taxa de aprendizado (quanto o Q-value é atualizado a cada iteração). Padrão é 0.1.
             gamma (float, optional): Fator de desconto para recompensas futuras. Padrão é 0.9.
             step_callback (callable, optional): Função chamada a cada movimento do agente, recebe a posição atual como argumento. Útil para visualização. Padrão é None.
             max_episodes (int, optional): Número máximo de episódios de treinamento. Padrão é 1000.
@@ -239,7 +237,7 @@ class QLearningSimulator:
                     old_q = self.q_table[position][direction]
                     next_qs = self.q_table[next_position].values()
                     max_next_q = max(next_qs) if next_qs else 0
-                    self.q_table[position][direction] = old_q + alpha * (reward + gamma * max_next_q - old_q)
+                    self.q_table[position][direction] = old_q + (reward + gamma * max_next_q - old_q)
                     
                 if next_position in self.ambient_table[position] and direction:
                     self.ambient_table[position][next_position] = self.q_table[position][direction]
